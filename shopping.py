@@ -4,6 +4,7 @@ import sys
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
+#Constants
 TEST_SIZE = 0.4
 
 
@@ -38,28 +39,28 @@ def load_data(filename):
     with open(filename, 'r') as csvfile:
         csvreader = csv.reader(csvfile)
         
-        # Ignorer la première ligne en-tête
+        # Ignore first header line
         header = next(csvreader)  
 
-        # Convertir les valeurs des colonnes selon les spécifications
+        # Convert column values ​​according to specifications
         for row in csvreader:
             evidence_row = [
-                            # Convertir en int
+                            # convert to int
                             int(row[i]) if header[i] in ['Administrative','Informational', 'ProductRelated', 'OperatingSystems', 'Browser', 'Region',
                                                          'TrafficType'] else  
-                            # Convertir en float
+                            # convert to float
                             float(row[i]) if header[i] in ['Administrative_Duration', 'Informational_Duration',
                                                           'ProductRelated_Duration', 'BounceRates', 'ExitRates',
                                                           'PageValues', 'SpecialDay'] else
-                            # Convertir en 0 ou 1
+                            # Convert to 0 or 1
                             0 if header[i] == 'VisitorType' and row[i] == 'New_Visitor' else  
-                            # Convertir en 0 ou 1
+                            # Convert to 0 or 1
                             0 if header[i] == 'VisitorType' and row[i] == 'Other' else  
-                            # Convertir en 0 ou 1
+                            # Convert to 0 or 1
                             1 if header[i] == 'VisitorType' and row[i] == 'Returning_Visitor' else
                             0 if header[i] == 'Weekend' and row[i] == 'FALSE' else  
                             1 if header[i] == 'Weekend' and row[i] == 'TRUE' else
-                            # Convertir le mois en chiffre
+                            # Convert month to number
                             0 if header[i] == 'Month' and row[i] == 'Jan' else  
                             1 if header[i] == 'Month' and row[i] == 'Feb' else
                             2 if header[i] == 'Month' and row[i] == 'Mar' else
@@ -75,7 +76,7 @@ def load_data(filename):
                             row[i]
                             for i in range(len(header) - 1)]
 
-            label = 1 if row[-1] == 'TRUE' else 0  # Convertir en 0 ou 1
+            label = 1 if row[-1] == 'TRUE' else 0  # Convert to 0 or 1
 
             evidence.append(evidence_row)
             labels.append(label)
@@ -83,32 +84,32 @@ def load_data(filename):
     return evidence, labels
 
 def train_model(evidence, labels):
-    #Création du classifcateur avec le premier voisin le plus proche
+    # Creating the classifcator with the first nearest neighbor
     model = KNeighborsClassifier(n_neighbors=1)
     
-    #Entrainement du modèle
+    # Model training
     model.fit(evidence, labels)
     
     return model
 
 def evaluate(labels, predictions):
 
-    # Nombre de vrai positif
+    # Number of true positives
     vrai_positifs = sum((true == 1) and (predicted == 1) for true, predicted in zip(labels, predictions))
     
-    #Nombre devrai negatif
+    # Number of true negatives
     vrai_negatifs = sum((true == 0) and (predicted == 0) for true, predicted in zip(labels, predictions))
     
-    #Nombre de faux positifs
+    # Number of false positives
     faux_positifs = sum((true == 0) and (predicted == 1) for true, predicted in zip(labels, predictions))
     
-    #Nombre de fauxx negatfifs
+    # Number of false negatives
     faux_negatifs = sum((true == 1) and (predicted == 0) for true, predicted in zip(labels, predictions))
     
-    # Calculer la sensibilité et la spécificité
+    # Calculate sensitivity
     sensitivity = vrai_positifs / (vrai_positifs + faux_negatifs) if vrai_positifs + faux_negatifs != 0 else 0.0
     
-    # Calculer la sensibilité et la spécificité
+    # Calculate specificity
     specificity = vrai_negatifs / (vrai_negatifs + faux_positifs) if vrai_negatifs + faux_positifs != 0 else 0.0
 
     return sensitivity, specificity
